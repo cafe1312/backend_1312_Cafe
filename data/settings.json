@@ -1,0 +1,13 @@
+{
+  "cafeName": "1312 Cafe",
+  "phone": "+1 234 567 8900",
+  "email": "contact@1312cafe.com",
+  "address": "1312 Gourmet St, Culinary City",
+  "businessHours": {
+    "open": "08:00",
+    "close": "22:00",
+    "days": "Monday - Sunday"
+  },
+  "deliveryCharges": 5,
+  "taxPercentage": 8
+}
