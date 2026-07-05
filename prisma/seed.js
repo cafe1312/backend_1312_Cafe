@@ -7,18 +7,27 @@ async function main() {
   console.log('Seeding 1312 Cafe database with actual menu...');
 
   // 1. Create Default Admin
-  const adminPassword = 'admin';
+  const adminPassword = '1312Cafe@1312';
   const passwordHash = await bcrypt.hash(adminPassword, 10);
   const admin = await prisma.admin.upsert({
-    where: { username: 'admin' },
-    update: {},
+    where: { username: 'cafe1312' },
+    update: {
+      passwordHash,
+    },
     create: {
-      username: 'admin',
+      username: 'cafe1312',
       passwordHash,
       role: 'admin',
     },
   });
-  console.log('Admin seeded: admin / admin');
+  console.log('Admin seeded: cafe1312 / 1312Cafe@1312');
+
+  // Delete old default admin to secure the app
+  await prisma.admin.deleteMany({
+    where: {
+      username: 'admin'
+    }
+  });
 
   // Clear existing items to avoid duplicates
   await prisma.orderItem.deleteMany({});
