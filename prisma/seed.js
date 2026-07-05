@@ -37,7 +37,7 @@ async function main() {
     { name: 'Pizzas', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&auto=format&fit=crop&q=60' },
     { name: 'Burgers', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=60' },
     { name: 'Meals', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60' },
-    { name: 'Shawarma', image: 'https://images.unsplash.com/photo-1642680206977-f25b30691523?w=500&auto=format&fit=crop&q=60' }
+    { name: 'Shawarma', image: 'https://images.unsplash.com/photo-1561651823-34fed022540e?w=500&auto=format&fit=crop&q=60' }
   ];
 
   const seededCategories = [];
@@ -108,15 +108,15 @@ async function main() {
     { name: 'Non-Veg Multi Meal', description: 'Includes: Tandoori Chicken Pizza, Loaded Crunchy Burger, Peri Peri Fries, and Ocean Breeze.', price: 499.00, categoryName: 'Meals', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500' },
 
     // SHAWARMA
-    { name: 'Classic Shawarma', description: 'Slow-roasted chicken wrapped in pita bread with garlic sauce and pickles.', price: 69.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1642680206977-f25b30691523?w=500' },
-    { name: 'Hot and Spicy Shawarma', description: 'Spicy chicken shawarma wrapped with chilli flakes and hot garlic paste.', price: 79.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1642680206977-f25b30691523?w=500' },
-    { name: 'Cheesy Shawarma', description: 'Standard shawarma loaded with extra shredded mozzarella cheese.', price: 99.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1642680206977-f25b30691523?w=500' },
-    { name: 'Peri Peri Shawarma', description: 'Tender chicken shawarma seasoned with firey peri peri powder.', price: 119.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1642680206977-f25b30691523?w=500' },
-    { name: 'BBQ Shawarma', description: 'Roasted chicken tossed in smoky hickory BBQ sauce, wrapped in warm pita.', price: 119.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1642680206977-f25b30691523?w=500' },
-    { name: 'Mexican Cheese Shawarma', description: 'Shawarma with jalapeños, salsa, and melted Mexican blend cheese.', price: 129.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1642680206977-f25b30691523?w=500' },
-    { name: 'Tandoori Shawarma', description: 'Grilled chicken marinated in tandoori masala, wrapped with mint chutney.', price: 129.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1642680206977-f25b30691523?w=500' },
-    { name: 'Open Shawarma', description: 'Deconstructed chicken shawarma served in a platter with pita, fries, and garlic dip.', price: 149.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1642680206977-f25b30691523?w=500' },
-    { name: 'Open Cheesy Shawarma', description: 'Deconstructed open shawarma platter loaded with cheese and baked.', price: 169.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1642680206977-f25b30691523?w=500' },
+    { name: 'Classic Shawarma', description: 'Slow-roasted chicken wrapped in pita bread with garlic sauce and pickles.', price: 69.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1561651823-34fed022540e?w=500' },
+    { name: 'Hot and Spicy Shawarma', description: 'Spicy chicken shawarma wrapped with chilli flakes and hot garlic paste.', price: 79.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1626700051175-6518c4793f06?w=500' },
+    { name: 'Cheesy Shawarma', description: 'Standard shawarma loaded with extra shredded mozzarella cheese.', price: 99.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1619535860434-ba1d8fa12536?w=500' },
+    { name: 'Peri Peri Shawarma', description: 'Tender chicken shawarma seasoned with firey peri peri powder.', price: 119.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1561651823-34fed022540e?w=500' },
+    { name: 'BBQ Shawarma', description: 'Roasted chicken tossed in smoky hickory BBQ sauce, wrapped in warm pita.', price: 119.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1626700051175-6518c4793f06?w=500' },
+    { name: 'Mexican Cheese Shawarma', description: 'Shawarma with jalapeños, salsa, and melted Mexican blend cheese.', price: 129.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1619535860434-ba1d8fa12536?w=500' },
+    { name: 'Tandoori Shawarma', description: 'Grilled chicken marinated in tandoori masala, wrapped with mint chutney.', price: 129.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1561651823-34fed022540e?w=500' },
+    { name: 'Open Shawarma', description: 'Deconstructed chicken shawarma served in a platter with pita, fries, and garlic dip.', price: 149.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1626700051175-6518c4793f06?w=500' },
+    { name: 'Open Cheesy Shawarma', description: 'Deconstructed open shawarma platter loaded with cheese and baked.', price: 169.00, categoryName: 'Shawarma', image: 'https://images.unsplash.com/photo-1619535860434-ba1d8fa12536?w=500' },
   ];
 
   for (const prod of products) {
@@ -129,6 +129,7 @@ async function main() {
           price: prod.price,
           image: prod.image,
           available: true,
+          isVeg: prod.isVeg !== undefined ? prod.isVeg : !prod.name.toLowerCase().includes('chicken') && !prod.name.toLowerCase().includes('non-veg') && !prod.categoryName.toLowerCase().includes('shawarma'),
           categoryId: category.id,
         }
       });

@@ -79,4 +79,28 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`Server is running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
   console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
+
+  // DB Cleanup Task: delete orders older than 3 days to save space
+  const prisma = require('./config/db');
+  const purgeOldOrders = async () => {
+    try {
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+      const result = await prisma.order.deleteMany({
+        where: {
+          createdAt: {
+            lt: threeDaysAgo
+          }
+        }
+      });
+      console.log(`[DB Cleanup] Successfully purged ${result.count} orders older than 3 days.`);
+    } catch (err) {
+      console.error('[DB Cleanup] Error purging old orders:', err.message);
+    }
+  };
+
+  // Run on startup
+  purgeOldOrders();
+  // Run every 24 hours
+  setInterval(purgeOldOrders, 24 * 60 * 60 * 1000);
 });

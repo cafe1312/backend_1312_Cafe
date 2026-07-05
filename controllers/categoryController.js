@@ -1,8 +1,19 @@
 const prisma = require('../config/db');
+const { clearProductsCache } = require('./productController');
+
+let categoriesCache = null;
+
+function clearCategoriesCache() {
+  categoriesCache = null;
+}
 
 // Get all categories
 async function getCategories(req, res, next) {
   try {
+    if (categoriesCache) {
+      return res.status(200).json({ success: true, categories: categoriesCache });
+    }
+
     const categories = await prisma.category.findMany({
       include: {
         _count: {
@@ -10,6 +21,8 @@ async function getCategories(req, res, next) {
         }
       }
     });
+
+    categoriesCache = categories;
     res.status(200).json({ success: true, categories });
   } catch (error) {
     next(error);
@@ -19,7 +32,7 @@ async function getCategories(req, res, next) {
 // Create category
 async function createCategory(req, res, next) {
   try {
-    const { name, image } = req.body;
+    const { name, image, availableFrom, availableTo } = req.body;
     if (!name) {
       return res.status(400).json({ success: false, message: 'Category name is required' });
     }
@@ -30,10 +43,49 @@ async function createCategory(req, res, next) {
     }
 
     const category = await prisma.category.create({
-      data: { name, image }
+      data: { name, image, availableFrom, availableTo }
     });
 
+    clearCategoriesCache();
     res.status(201).json({ success: true, message: 'Category created successfully', category });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// Update category (Admin only)
+async function updateCategory(req, res, next) {
+  try {
+    const { id } = req.params;
+    const categoryId = parseInt(id);
+    const { name, image, availableFrom, availableTo } = req.body;
+
+    if (isNaN(categoryId)) {
+      return res.status(400).json({ success: false, message: 'Invalid category ID' });
+    }
+
+    if (name) {
+      const existing = await prisma.category.findUnique({ where: { name } });
+      if (existing && existing.id !== categoryId) {
+        return res.status(400).json({ success: false, message: 'Category name already exists' });
+      }
+    }
+
+    let updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (image !== undefined) updateData.image = image;
+    if (availableFrom !== undefined) updateData.availableFrom = availableFrom;
+    if (availableTo !== undefined) updateData.availableTo = availableTo;
+
+    const category = await prisma.category.update({
+      where: { id: categoryId },
+      data: updateData
+    });
+
+    clearCategoriesCache();
+    clearProductsCache();
+
+    res.status(200).json({ success: true, message: 'Category updated successfully', category });
   } catch (error) {
     next(error);
   }
@@ -53,6 +105,9 @@ async function deleteCategory(req, res, next) {
       where: { id: categoryId }
     });
 
+    clearCategoriesCache();
+    clearProductsCache();
+
     res.status(200).json({ success: true, message: 'Category deleted successfully' });
   } catch (error) {
     next(error);
@@ -62,5 +117,6 @@ async function deleteCategory(req, res, next) {
 module.exports = {
   getCategories,
   createCategory,
+  updateCategory,
   deleteCategory,
 };

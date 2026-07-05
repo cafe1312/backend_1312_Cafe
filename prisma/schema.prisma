@@ -1,7 +1,6 @@
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -22,6 +21,7 @@ model Customer {
   id        Int      @id @default(autoincrement())
   name      String
   phone     String   @unique
+  address   String?
   createdAt DateTime @default(now()) @map("created_at")
   orders    Order[]
 
@@ -29,10 +29,12 @@ model Customer {
 }
 
 model Category {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  image    String?
-  products Product[]
+  id            Int       @id @default(autoincrement())
+  name          String    @unique
+  image         String?
+  availableFrom String?   @map("available_from")
+  availableTo   String?   @map("available_to")
+  products      Product[]
 
   @@map("categories")
 }
@@ -45,6 +47,7 @@ model Product {
   price       Float
   image       String?
   available   Boolean     @default(true)
+  isVeg       Boolean     @default(true) @map("is_veg")
   createdAt   DateTime    @default(now()) @map("created_at")
   category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   orderItems  OrderItem[]
@@ -53,15 +56,21 @@ model Product {
 }
 
 model Order {
-  id            Int         @id @default(autoincrement())
-  customerId    Int         @map("customer_id")
-  totalAmount   Float       @map("total_amount")
-  paymentMethod String      @map("payment_method")
-  paymentStatus String      @map("payment_status")
-  status        String      @default("PENDING") // PENDING, PREPARING, READY, COMPLETED, CANCELLED
-  createdAt     DateTime    @default(now()) @map("created_at")
-  customer      Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  items         OrderItem[]
+  id             Int         @id @default(autoincrement())
+  customerId     Int         @map("customer_id")
+  totalAmount    Float       @map("total_amount")
+  paymentMethod  String      @map("payment_method")
+  paymentStatus  String      @map("payment_status")
+  status         String      @default("PENDING") // PENDING, PREPARING, READY, COMPLETED, CANCELLED
+  deliveryMethod String      @default("TAKEAWAY") @map("delivery_method")
+  address        String?
+  latitude       Float?
+  longitude      Float?
+  distance       Float?
+  deliveryCharges Float?      @map("delivery_charges")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  customer       Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items          OrderItem[]
 
   @@map("orders")
 }
