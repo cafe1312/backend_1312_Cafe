@@ -103,16 +103,40 @@ async function createOrder(req, res, next) {
           const maxRange = parseFloat(settings.deliveryRangeKm) || 10.0;
           const chargePerKm = parseFloat(settings.deliveryChargePerKm) || 10.0;
 
-          // Haversine distance
-          const R = 6371; // km
-          const dLat = (finalLat - shopLat) * Math.PI / 180;
-          const dLon = (finalLon - shopLon) * Math.PI / 180;
-          const a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(shopLat * Math.PI / 180) * Math.cos(finalLat * Math.PI / 180) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          calculatedDistance = R * c;
+          // Attempt to fetch road distance from OSRM, fallback to Haversine
+          try {
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${finalLon},${finalLat};${shopLon},${shopLat}?overview=false`;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3-second timeout
+            
+            const response = await fetch(osrmUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+              const data = await response.json();
+              if (data.code === 'Ok' && data.routes && data.routes[0]) {
+                const osrmDist = data.routes[0].distance / 1000; // in km
+                if (!isNaN(osrmDist)) {
+                  calculatedDistance = osrmDist;
+                }
+              }
+            }
+          } catch (osrmErr) {
+            console.error('OSRM road distance failed, falling back to Haversine:', osrmErr.message);
+          }
+
+          if (calculatedDistance === null) {
+            // Haversine distance fallback
+            const R = 6371; // km
+            const dLat = (finalLat - shopLat) * Math.PI / 180;
+            const dLon = (finalLon - shopLon) * Math.PI / 180;
+            const a =
+              Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(shopLat * Math.PI / 180) * Math.cos(finalLat * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            calculatedDistance = R * c;
+          }
 
           if (calculatedDistance > maxRange) {
             return res.status(400).json({
@@ -138,7 +162,7 @@ async function createOrder(req, res, next) {
           customerId: customer.id,
           totalAmount: finalTotalAmount,
           paymentMethod,
-          paymentStatus: paymentMethod === 'CASH' ? 'PENDING' : 'PAID', // simulated
+          paymentStatus: (paymentMethod.toUpperCase() === 'CASH' || paymentMethod.toUpperCase() === 'UPI') ? 'PENDING' : 'PAID',
           status: 'PENDING',
           deliveryMethod: deliveryMethod || 'TAKEAWAY',
           address: deliveryMethod === 'DELIVERY' ? address : null,
