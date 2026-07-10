@@ -38,9 +38,9 @@ app.use(rateLimiter);
 // Logger
 app.use(morgan('dev'));
 
-// Body Parsers
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Body Parsers (with size limits to prevent DoS/oversized inputs)
+app.use(express.json({ limit: '50kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Serve static upload folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

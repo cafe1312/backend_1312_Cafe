@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const prisma = require('../config/db');
 const jwt = require('jsonwebtoken');
+const { calculateRoadDistance } = require('../utils/distance');
 
 
 // Create new order
@@ -103,30 +104,14 @@ async function createOrder(req, res, next) {
           const maxRange = parseFloat(settings.deliveryRangeKm) || 10.0;
           const chargePerKm = parseFloat(settings.deliveryChargePerKm) || 10.0;
 
-          // Attempt to fetch road distance from OSRM, fallback to Haversine
+          // Calculate distance via Google Maps / OSRM / Haversine fallback
           try {
-            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${finalLon},${finalLat};${shopLon},${shopLat}?overview=false`;
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000); // 3-second timeout
-            
-            const response = await fetch(osrmUrl, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            
-            if (response.ok) {
-              const data = await response.json();
-              if (data.code === 'Ok' && data.routes && data.routes[0]) {
-                const osrmDist = data.routes[0].distance / 1000; // in km
-                if (!isNaN(osrmDist)) {
-                  calculatedDistance = osrmDist;
-                }
-              }
+            if (!process.env.GOOGLE_MAPS_API_KEY && settings.googleMapsApiKey) {
+              process.env.GOOGLE_MAPS_API_KEY = settings.googleMapsApiKey;
             }
-          } catch (osrmErr) {
-            console.error('OSRM road distance failed, falling back to Haversine:', osrmErr.message);
-          }
-
-          if (calculatedDistance === null) {
-            // Haversine distance fallback
+            calculatedDistance = await calculateRoadDistance(finalLat, finalLon, shopLat, shopLon);
+          } catch (distErr) {
+            console.error('Failed to calculate distance, falling back to Haversine:', distErr.message);
             const R = 6371; // km
             const dLat = (finalLat - shopLat) * Math.PI / 180;
             const dLon = (finalLon - shopLon) * Math.PI / 180;

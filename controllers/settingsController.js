@@ -1,7 +1,51 @@
 const fs = require('fs');
 const path = require('path');
+const { calculateRoadDistance } = require('../utils/distance');
 
 const settingsFilePath = path.join(__dirname, '../data/settings.json');
+
+// Default Customization Objects
+const defaultKotCustomization = {
+  width: "72mm",
+  height: "auto",
+  titleText: "KITCHEN ORDER TICKET",
+  fontSizeTitle: "1.25em",
+  boldTitle: true,
+  fontSizeMeta: "0.9em",
+  boldMeta: false,
+  fontSizeItems: "1.0em",
+  boldItems: false,
+  fontSizeTotals: "1.1em",
+  boldTotals: true,
+  fontSizeFooter: "0.9em",
+  boldFooter: false,
+  footerText: "",
+  showCustomer: true,
+  showDateTime: true,
+  lineStyle: "dashed"
+};
+
+const defaultBillCustomization = {
+  width: "72mm",
+  height: "auto",
+  titleText: "1312 Cafe",
+  fontSizeTitle: "1.35em",
+  boldTitle: true,
+  fontSizeHeader: "0.85em",
+  boldHeader: false,
+  fontSizeMeta: "0.95em",
+  boldMeta: false,
+  fontSizeItems: "0.95em",
+  boldItems: false,
+  fontSizeTotals: "1.1em",
+  boldTotals: true,
+  fontSizeFooter: "0.9em",
+  boldFooter: false,
+  footerText: "Thank you for dining with us!",
+  showAddress: true,
+  showPhone: true,
+  lineStyle: "dashed"
+};
 
 // Initialize settings file if not exists
 function ensureSettingsExist() {
@@ -39,7 +83,9 @@ function ensureSettingsExist() {
       aboutPhilosophyText: "We believe that coffee is more than just a morning caffeine routine. It is a moment of pause, a medium for conversation, and a craft that rewards patience and precision. Every bean we roast and brew is ethically sourced from single-origin cooperatives. Our baristas undergo rigorous training to master temperature, grind size, and extraction timing to bring out the perfect flavor profile in your cup.",
       aboutMainImage: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&auto=format&fit=crop",
       termsTitle: "Terms of Service",
-      termsContent: "1. Ordering & Acceptance\nBy placing an order through 1312 Cafe, you agree to buy the selected items at the prices displayed. All orders are subject to availability and kitchen operating hours. We reserve the right to cancel or refuse any order due to stock constraints, pricing errors, or general kitchen capacity limits.\n\n2. Cancellations and Changes\nWe know plans change! You are allowed to cancel your order directly from the tracking page within 10 seconds of submitting the order. Once the 10-second window closes, the order is locked and sent to prep, and cancellations or refunds will no longer be possible.\n\n3. Payments & Billing\nWe support multiple payment choices, including Cash, Card, and UPI.\n- Cash: Cash payments are due at the counter upon picking up your order (Takeaway) or to the driver upon delivery.\n- Card / UPI: Payments must be authorized at checkout. Any promo codes must be applied before final payment.\n\n4. Delivery and Pick Up\nWe provide Takeaway and Home Delivery services:\n- Takeaway: You are responsible for picking up your order from our counter within a reasonable time. We cannot guarantee beverage temperature for late pick ups.\n- Home Delivery: Delivery will be executed to the address supplied during checkout. You must ensure someone is available to receive and pay for the order (if paying via Cash).\n\n5. Terms Revisions\nWe may revise these Terms of Service at any time. Your continued use of our ordering platform constitutes agreement to the updated terms."
+      termsContent: "1. Ordering & Acceptance\nBy placing an order through 1312 Cafe, you agree to buy the selected items at the prices displayed. All orders are subject to availability and kitchen operating hours. We reserve the right to cancel or refuse any order due to stock constraints, pricing errors, or general kitchen capacity limits.\n\n2. Cancellations and Changes\nWe know plans change! You are allowed to cancel your order directly from the tracking page within 10 seconds of submitting the order. Once the 10-second window closes, the order is locked and sent to prep, and cancellations or refunds will no longer be possible.\n\n3. Payments & Billing\nWe support multiple payment choices, including Cash, Card, and UPI.\n- Cash: Cash payments are due at the counter upon picking up your order (Takeaway) or to the driver upon delivery.\n- Card / UPI: Payments must be authorized at checkout. Any promo codes must be applied before final payment.\n\n4. Delivery and Pick Up\nWe provide Takeaway and Home Delivery services:\n- Takeaway: You are responsible for picking up your order from our counter within a reasonable time. We cannot guarantee beverage temperature for late pick ups.\n- Home Delivery: Delivery will be executed to the address supplied during checkout. You must ensure someone is available to receive and pay for the order (if paying via Cash).\n\n5. Terms Revisions\nWe may revise these Terms of Service at any time. Your continued use of our ordering platform constitutes agreement to the updated terms.",
+      kotCustomization: defaultKotCustomization,
+      billCustomization: defaultBillCustomization
     };
     fs.writeFileSync(settingsFilePath, JSON.stringify(defaultSettings, null, 2), 'utf-8');
   } else {
@@ -115,6 +161,19 @@ function ensureSettingsExist() {
         data.deliveryChargePerKm = 10.0;
         modified = true;
       }
+      if (!data.hasOwnProperty('kotCustomization')) {
+        data.kotCustomization = defaultKotCustomization;
+        modified = true;
+      }
+      if (!data.hasOwnProperty('billCustomization')) {
+        data.billCustomization = defaultBillCustomization;
+        modified = true;
+      }
+      // Remove deprecated googleMapsApiKey from settings file if it exists
+      if (data.hasOwnProperty('googleMapsApiKey')) {
+        delete data.googleMapsApiKey;
+        modified = true;
+      }
       if (modified) {
         fs.writeFileSync(settingsFilePath, JSON.stringify(data, null, 2), 'utf-8');
       }
@@ -167,7 +226,9 @@ async function updateSettings(req, res, next) {
       aboutPhilosophyText,
       aboutMainImage,
       termsTitle,
-      termsContent
+      termsContent,
+      kotCustomization,
+      billCustomization
     } = req.body;
 
     const newSettings = {
@@ -195,7 +256,9 @@ async function updateSettings(req, res, next) {
       aboutPhilosophyText: aboutPhilosophyText !== undefined ? aboutPhilosophyText : currentData.aboutPhilosophyText,
       aboutMainImage: aboutMainImage !== undefined ? aboutMainImage : currentData.aboutMainImage,
       termsTitle: termsTitle !== undefined ? termsTitle : currentData.termsTitle,
-      termsContent: termsContent !== undefined ? termsContent : currentData.termsContent
+      termsContent: termsContent !== undefined ? termsContent : currentData.termsContent,
+      kotCustomization: kotCustomization !== undefined ? kotCustomization : (currentData.kotCustomization || defaultKotCustomization),
+      billCustomization: billCustomization !== undefined ? billCustomization : (currentData.billCustomization || defaultBillCustomization)
     };
 
     fs.writeFileSync(settingsFilePath, JSON.stringify(newSettings, null, 2), 'utf-8');
@@ -206,7 +269,41 @@ async function updateSettings(req, res, next) {
   }
 }
 
+// Calculate road distance securely from the backend (OpenStreetMap-based OSRM routing)
+async function getDistance(req, res, next) {
+  try {
+    const { latitude, longitude } = req.body;
+
+    if (latitude === undefined || longitude === undefined) {
+      return res.status(400).json({ success: false, message: 'Latitude and longitude are required.' });
+    }
+
+    const lat = parseFloat(latitude);
+    const lon = parseFloat(longitude);
+
+    if (isNaN(lat) || isNaN(lon)) {
+      return res.status(400).json({ success: false, message: 'Invalid coordinates.' });
+    }
+
+    ensureSettingsExist();
+    const settings = JSON.parse(fs.readFileSync(settingsFilePath, 'utf-8'));
+    const shopLat = parseFloat(settings.shopLatitude);
+    const shopLon = parseFloat(settings.shopLongitude);
+
+    if (isNaN(shopLat) || isNaN(shopLon)) {
+      return res.status(500).json({ success: false, message: 'Shop coordinates are not configured in system settings.' });
+    }
+
+    const distance = await calculateRoadDistance(lat, lon, shopLat, shopLon);
+
+    res.status(200).json({ success: true, distance });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getSettings,
   updateSettings,
+  getDistance,
 };
