@@ -4,11 +4,13 @@ const PDFDocument = require('pdfkit');
 // Get overall dashboard stats
 async function getDashboardStats(req, res, next) {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    // Align daily stats with Indian Standard Time (IST - UTC+5:30)
+    const nowIST = new Date(new Date().getTime() + 5.5 * 60 * 60 * 1000);
+    const todayIST = new Date(nowIST);
+    todayIST.setUTCHours(0, 0, 0, 0);
+    
+    const today = new Date(todayIST.getTime() - 5.5 * 60 * 60 * 1000);
+    const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
     // 1. Today's orders
     const todayOrders = await prisma.order.findMany({
